@@ -1,0 +1,31 @@
+# MacroHFT Colab Requirements
+
+# Core
+numpy>=1.21.0
+pandas>=1.3.0
+scipy>=1.7.0
+
+# Binance
+python-binance>=1.0.17
+
+# Data
+pyarrow
+
+# Config
+pyyaml
+
+# Viz
+matplotlib
+seaborn
+
+# Utils
+tqdm
+joblib
+
+# Gym (Pinned for MacroHFT compatibility)
+gym==0.26.2
+shimmy>=0.1.0
+
+# Note: PyTorch and Torchvision are pre-installed on Colab with CUDA support.
+# We do not reinstall them to avoid version mismatches with the Colab runtime.
+
