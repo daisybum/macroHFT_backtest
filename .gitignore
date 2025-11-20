@@ -6,18 +6,19 @@ __pycache__/
 pipeline.log
 *.log
 
-# Data directories (keep structure but ignore large files if needed, strictly ignoring downloaded data)
+# Data directories
 backtest/data/raw/
 backtest/data/processed/
 backtest/data/cache/
 
-# Generated models and data in MacroHFT
+# Results and artifacts
+backtest/results/
 MacroHFT/data/BTCUSDT/
 MacroHFT/result/low_level/BTCUSDT/
 MacroHFT/result/high_level/BTCUSDT/
 MacroHFT/logs/
 
-# Ignore large files in general
+# Large files
 *.feather
 *.pkl
 *.pth
