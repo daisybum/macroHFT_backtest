@@ -1,0 +1,84 @@
+# Bitcoin MacroHFT Backtesting Configuration
+
+# Data Configuration
+data:
+  symbol: "BTCUSDT"
+  interval: "1m"  # 1-minute candles
+  start_date: "2024-11-14"  # Start date
+  end_date: "2025-11-13"  # End date (today)
+  data_dir: "./backtest/data/raw"
+  processed_dir: "./backtest/data/processed"
+  cache_dir: "./backtest/data/cache"
+
+# MacroHFT Model Configuration
+model:
+  base_model_path: "./MacroHFT/result/low_level/ETHUSDT/best_model"
+  slope_models:
+    - "./MacroHFT/result/low_level/ETHUSDT/best_model/slope/1/best_model.pkl"
+    - "./MacroHFT/result/low_level/ETHUSDT/best_model/slope/2/best_model.pkl"
+    - "./MacroHFT/result/low_level/ETHUSDT/best_model/slope/3/best_model.pkl"
+  vol_models:
+    - "./MacroHFT/result/low_level/ETHUSDT/best_model/vol/1/best_model.pkl"
+    - "./MacroHFT/result/low_level/ETHUSDT/best_model/vol/2/best_model.pkl"
+    - "./MacroHFT/result/low_level/ETHUSDT/best_model/vol/3/best_model.pkl"
+  feature_list_path: "./MacroHFT/data/feature_list"
+  device: "cpu"  # Use "cuda:0" if GPU available
+
+# Trading Configuration
+trading:
+  initial_capital: 10000.0  # USD
+  max_holding_number: 0.01  # BTC (matching MacroHFT BTC configuration)
+  transaction_cost: 0.0002  # 0.02% (Binance standard fee)
+  slippage: 0.0001  # 0.01% slippage assumption
+  position_sizing: "fixed"  # fixed or dynamic
+
+# Backtesting Configuration
+backtest:
+  mode: "event_driven"  # event_driven or vectorized
+  initial_position: 0  # 0 = no position, 1 = full position
+  
+# Feature Engineering
+features:
+  # Technical indicators (matching MacroHFT requirements)
+  window_sizes:
+    - 360  # For slope_360 and vol_360
+  smoothing:
+    butter_filter_order: 1
+    butter_cutoff: 0.05
+
+# Episodic Memory Configuration
+episodic_memory:
+  enabled: true
+  capacity: 4320  # One day of 1-minute candles
+  k_neighbors: 5
+  
+# Demonstration Q-table
+demonstration:
+  compute: true  # Compute Q-table for Bitcoin
+  reward_scale: 1000
+  gamma: 0.999
+  commission_fee: 0.001
+  max_punish: 1e12
+
+# Analysis Configuration
+analysis:
+  metrics:
+    - "total_return"
+    - "sharpe_ratio"
+    - "max_drawdown"
+    - "win_rate"
+    - "profit_factor"
+    - "calmar_ratio"
+  benchmark: "buy_and_hold"
+  plot_equity_curve: true
+  plot_drawdown: true
+  plot_trades: true
+
+# Output Configuration
+output:
+  results_dir: "./backtest/results"
+  save_trades: true
+  save_metrics: true
+  save_plots: true
+  verbose: true
+
