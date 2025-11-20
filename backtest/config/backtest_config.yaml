@@ -22,7 +22,7 @@ model:
     - "./MacroHFT/result/low_level/ETHUSDT/best_model/vol/2/best_model.pkl"
     - "./MacroHFT/result/low_level/ETHUSDT/best_model/vol/3/best_model.pkl"
   feature_list_path: "./MacroHFT/data/feature_list"
-  device: "cpu"  # Use "cuda:0" if GPU available
+  device: "cuda:0"  # Use "cuda:0" if GPU available, "cpu" otherwise
 
 # Trading Configuration
 trading:

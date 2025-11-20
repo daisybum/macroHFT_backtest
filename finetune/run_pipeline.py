@@ -8,8 +8,11 @@ import subprocess
 import os
 import sys
 import time
+import torch
 
 PYTHON_EXEC = sys.executable
+DEVICE = "cuda:0" if torch.cuda.is_available() else "cpu"
+print(f"[Pipeline] Using device: {DEVICE}", flush=True)
 
 def run_command(cmd, description):
     print("\n" + "="*80, flush=True)
@@ -68,7 +71,7 @@ def main():
             f"--alpha {alpha} "
             f"--clf {clf} "
             f"--label {label} "
-            f"--device cpu "
+            f"--device {DEVICE} "
             f"--epoch_number 3 "
             f"--pretrained_model \"{pretrained}\""
         )
@@ -82,7 +85,7 @@ def main():
     print("\n[Pipeline] Starting High-level Agent Fine-tuning", flush=True)
     cmd = (
         f'"{PYTHON_EXEC}" finetune/finetune_highlevel.py '
-        f"--device cpu "
+        f"--device {DEVICE} "
         f"--epoch_number 3 "
         f"--buffer_size 100000"
     )
