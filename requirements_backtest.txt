@@ -1,0 +1,43 @@
+# Bitcoin MacroHFT Backtesting Requirements
+# Windows-compatible (CPU-only, no GPU required)
+
+# Core dependencies
+numpy>=1.21.0,<2.0.0
+pandas>=1.3.0,<3.0.0
+scipy>=1.7.0,<2.0.0
+
+# Machine Learning / Deep Learning
+# PyTorch CPU-only version (smaller download, no CUDA)
+--extra-index-url https://download.pytorch.org/whl/cpu
+torch==2.1.0+cpu
+torchvision==0.16.0+cpu
+scikit-learn>=1.0.0,<2.0.0
+
+# Binance API
+python-binance>=1.0.17
+
+# Data handling
+pyarrow>=6.0.0,<15.0.0  # For feather format (Windows-compatible)
+
+# Configuration
+pyyaml>=6.0,<7.0
+
+# Visualization
+matplotlib>=3.4.0,<4.0.0
+seaborn>=0.11.0,<1.0.0
+
+# Utilities
+tqdm>=4.62.0
+joblib>=1.1.0
+
+# Gym environment (required for MacroHFT)
+gym==0.26.2  # Pinned version for compatibility
+
+# Optional but recommended: Jupyter for analysis
+jupyter>=1.0.0
+ipython>=7.30.0
+
+# Windows-specific: requests with proper SSL
+certifi>=2021.5.30
+urllib3>=1.26.0
+
