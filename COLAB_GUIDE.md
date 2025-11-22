@@ -8,7 +8,25 @@ This guide explains how to run the MacroHFT project on Google Colab with GPU sup
     *   Recommended Path: `My Drive/MacroHFT_Project`
     *   Ensure the folder structure is preserved.
 
-## 2. Fine-tuning on Colab
+## 2. Data Preparation (New!)
+
+Before fine-tuning, you need to download and prepare the Bitcoin data (including Order Book LOB).
+
+1.  Open **`setup_colab.ipynb`** or create a new notebook.
+2.  Run the data pipeline scripts in order:
+    ```python
+    # 1. Download Raw Data (Warning: Large download)
+    !python finetune/download_binance_raw.py
+    
+    # 2. Process LOB Snapshots
+    !python finetune/process_lob.py
+    
+    # 3. Merge and Create Final Dataset
+    !python finetune/merge_data.py
+    ```
+3.  This will create the training data in `MacroHFT/data/BTCUSDT/`.
+
+## 3. Fine-tuning on Colab
 
 1.  Open **`MacroHFT_Colab_Finetune.ipynb`** in Google Colab.
 2.  **Check Path**: Verify the `PROJECT_PATH` variable in the first code cell matches where you uploaded the folder.
