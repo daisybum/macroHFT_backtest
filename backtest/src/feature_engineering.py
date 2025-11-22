@@ -146,6 +146,58 @@ class FeatureEngineer:
         
         return df
     
+    def compute_lob_features(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Compute features based on Limit Order Book (LOB) data if available.
+        
+        Args:
+            df: DataFrame potentially containing LOB columns (bid1_p, bid1_q, etc.)
+            
+        Returns:
+            DataFrame with LOB features added
+        """
+        df = df.copy()
+        
+        # Check if LOB columns exist (at least level 1)
+        if 'bid1_p' not in df.columns or 'ask1_p' not in df.columns:
+            print("LOB columns not found. Skipping LOB feature computation.")
+            return df
+            
+        print("Computing LOB microstructure features...")
+        
+        # 1. Weighted Average Price (WAP)
+        # WAP = (BidPrice * AskQty + AskPrice * BidQty) / (BidQty + AskQty)
+        # Using level 1
+        df['wap1'] = (df['bid1_p'] * df['ask1_q'] + df['ask1_p'] * df['bid1_q']) / (df['bid1_q'] + df['ask1_q'])
+        
+        # 2. Price Spread
+        df['spread'] = df['ask1_p'] - df['bid1_p']
+        df['mid_price'] = (df['ask1_p'] + df['bid1_p']) / 2
+        
+        # 3. Volume Imbalance
+        # (BidQty - AskQty) / (BidQty + AskQty)
+        # Often called Order Book Imbalance (OBI)
+        df['volume_imbalance'] = (df['bid1_q'] - df['ask1_q']) / (df['bid1_q'] + df['ask1_q'])
+        
+        # 4. Total Depth (Level 1-5)
+        # Sum of quantities for top 5 levels
+        bid_q_cols = [c for c in df.columns if 'bid' in c and '_q' in c]
+        ask_q_cols = [c for c in df.columns if 'ask' in c and '_q' in c]
+        
+        df['total_bid_depth'] = df[bid_q_cols].sum(axis=1)
+        df['total_ask_depth'] = df[ask_q_cols].sum(axis=1)
+        df['total_depth'] = df['total_bid_depth'] + df['total_ask_depth']
+        df['depth_imbalance'] = (df['total_bid_depth'] - df['total_ask_depth']) / df['total_depth']
+        
+        # 5. Micro-price (weighted by volume imbalance)
+        # P_micro = P_mid + Imbalance * (Spread / 2)
+        df['micro_price'] = df['mid_price'] + df['volume_imbalance'] * (df['spread'] / 2)
+        
+        # Fill potential NaNs (e.g. zero volume)
+        df = df.fillna(method='ffill').fillna(0)
+        
+        return df
+
     def compute_moving_averages(self, df: pd.DataFrame) -> pd.DataFrame:
         """Compute moving average features"""
         df = df.copy()
@@ -296,6 +348,10 @@ class FeatureEngineer:
         print("\n=== Computing All Features ===")
         
         df = self.compute_basic_features(df)
+        
+        # Add LOB features if columns exist
+        df = self.compute_lob_features(df)
+        
         df = self.compute_moving_averages(df)
         df = self.compute_momentum_indicators(df)
         df = self.compute_volatility_features(df)
@@ -352,6 +408,7 @@ class FeatureEngineer:
 def main():
     """Main execution"""
     import argparse
+    from data_fetcher import BinanceDataFetcher
     
     parser = argparse.ArgumentParser(description='Engineer features for Bitcoin backtesting')
     parser.add_argument('--config', type=str, default='./backtest/config/backtest_config.yaml',
@@ -368,14 +425,23 @@ def main():
     
     # Load raw data
     if args.input:
+        print(f"Loading data from {args.input}")
         df = pd.read_feather(args.input)
         if 'timestamp' in df.columns:
             df.set_index('timestamp', inplace=True)
     else:
         # Load from default location
-        from data_fetcher import BinanceDataFetcher
-        fetcher = BinanceDataFetcher(config_path=args.config)
-        df = fetcher.load_data()
+        # Try to load merged LOB data first, else fallback to raw
+        lob_path = "./MacroHFT/data/BTCUSDT/whole/df_whole.feather"
+        if os.path.exists(lob_path):
+            print(f"Loading merged LOB data from {lob_path}")
+            df = pd.read_feather(lob_path)
+            if 'timestamp' in df.columns:
+                df.set_index('timestamp', inplace=True)
+        else:
+            print("LOB data not found. Loading standard OHLCV data...")
+            fetcher = BinanceDataFetcher(config_path=args.config)
+            df = fetcher.load_data()
     
     # Compute features
     df_processed = engineer.compute_all_features(df)
@@ -389,4 +455,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

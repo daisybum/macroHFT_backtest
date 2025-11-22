@@ -187,7 +187,17 @@ class BinanceDataFetcher:
     
     def load_data(self, filename: str = None) -> pd.DataFrame:
         """Load data from feather format"""
+        # Try to load merged LOB data first if filename is not specified
         if filename is None:
+            lob_path = "./MacroHFT/data/BTCUSDT/whole/df_whole.feather"
+            if os.path.exists(lob_path):
+                print(f"Loading enriched LOB data from: {lob_path}")
+                df = pd.read_feather(lob_path)
+                # Ensure timestamp is index
+                if 'timestamp' in df.columns:
+                    df.set_index('timestamp', inplace=True)
+                return df
+                
             filename = f"{self.symbol}_{self.interval}_raw.feather"
         
         filepath = os.path.join(self.data_dir, filename)
@@ -196,7 +206,8 @@ class BinanceDataFetcher:
             raise FileNotFoundError(f"Data file not found: {filepath}")
         
         df = pd.read_feather(filepath)
-        df.set_index('timestamp', inplace=True)
+        if 'timestamp' in df.columns:
+            df.set_index('timestamp', inplace=True)
         
         print(f"Loaded data from: {filepath}")
         print(f"Shape: {df.shape}")
@@ -252,4 +263,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
